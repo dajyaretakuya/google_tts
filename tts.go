@@ -3,7 +3,7 @@ package google_tts
 import (
 	"fmt"
 	"github.com/McLeod095/google_token"
-	"gtts/cache"
+	"github.com/McLeod095/md5_cache"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -77,8 +77,8 @@ type TTS struct {
 	Speed   float64
 	Text    string
 	Phrases []Phrase
-	Token   *token.GttsToken
-	Cache   cache.Cache
+	Token   *google_token.GttsToken
+	Cache   md5_cache.Cache
 }
 
 func splitText(text string) []Phrase {
@@ -167,7 +167,7 @@ func New(text string, speed float64, c cache.Cache) (*TTS, error) {
 		return nil, fmt.Errorf("Speed [%f] not supported", speed)
 	}
 	t := &TTS{Text: text, Speed: speed, Phrases: splitText(text), Cache: c}
-	tkn, err := token.New()
+	tkn, err := google_token.New()
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +193,7 @@ func (t *TTS) speech(p Phrase, length int, index int) ([]byte, error) {
 
 	req.URL.RawQuery = query.Encode()
 	req.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36")
-	req.Header.Add("Referer", token.GttsUrl)
+	req.Header.Add("Referer", google_token.GttsUrl)
 	client := &http.Client{}
 
 	resp, err := client.Do(req)
