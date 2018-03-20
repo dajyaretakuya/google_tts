@@ -1,71 +1,71 @@
-package tts
+package google_tts
 
 import (
 	"fmt"
-	"gtts/token"
+	"github.com/McLeod095/google_token"
+	"gtts/cache"
+	"io/ioutil"
 	"net/http"
 	"strconv"
-	"io/ioutil"
 	"unicode"
-	"gtts/cache"
 )
 
 var GOOGLE_TTS_URL = "https://translate.google.com/translate_tts"
 var MAX_CHARS = 100
 var LANGS = map[string]string{
-	"af" : "Afrikaans",
-	"sq" : "Albanian",
-	"ar" : "Arabic",
-	"hy" : "Armenian",
-	"bn" : "Bengali",
-	"ca" : "Catalan",
-	"zh" : "Chinese",
-	"zh-cn" : "Chinese (Mandarin/China)",
-	"zh-tw" : "Chinese (Mandarin/Taiwan)",
-	"zh-yue" : "Chinese (Cantonese)",
-	"hr" : "Croatian",
-	"cs" : "Czech",
-	"da" : "Danish",
-	"nl" : "Dutch",
-	"en" : "English",
-	"en-au" : "English (Australia)",
-	"en-uk" : "English (United Kingdom)",
-	"en-us" : "English (United States)",
-	"eo" : "Esperanto",
-	"fi" : "Finnish",
-	"fr" : "French",
-	"de" : "German",
-	"el" : "Greek",
-	"hi" : "Hindi",
-	"hu" : "Hungarian",
-	"is" : "Icelandic",
-	"id" : "Indonesian",
-	"it" : "Italian",
-	"ja" : "Japanese",
-	"km" : "Khmer (Cambodian)",
-	"ko" : "Korean",
-	"la" : "Latin",
-	"lv" : "Latvian",
-	"mk" : "Macedonian",
-	"no" : "Norwegian",
-	"pl" : "Polish",
-	"pt" : "Portuguese",
-	"ro" : "Romanian",
-	"ru" : "Russian",
-	"sr" : "Serbian",
-	"si" : "Sinhala",
-	"sk" : "Slovak",
-	"es" : "Spanish",
-	"es-es" : "Spanish (Spain)",
-	"es-us" : "Spanish (United States)",
-	"sw" : "Swahili",
-	"sv" : "Swedish",
-	"ta" : "Tamil",
-	"th" : "Thai",
-	"tr" : "Turkish",
-	"uk" : "Ukrainian",
-	"vi" : "Vietnamese",
-	"cy" : "Welsh",
+	"af":     "Afrikaans",
+	"sq":     "Albanian",
+	"ar":     "Arabic",
+	"hy":     "Armenian",
+	"bn":     "Bengali",
+	"ca":     "Catalan",
+	"zh":     "Chinese",
+	"zh-cn":  "Chinese (Mandarin/China)",
+	"zh-tw":  "Chinese (Mandarin/Taiwan)",
+	"zh-yue": "Chinese (Cantonese)",
+	"hr":     "Croatian",
+	"cs":     "Czech",
+	"da":     "Danish",
+	"nl":     "Dutch",
+	"en":     "English",
+	"en-au":  "English (Australia)",
+	"en-uk":  "English (United Kingdom)",
+	"en-us":  "English (United States)",
+	"eo":     "Esperanto",
+	"fi":     "Finnish",
+	"fr":     "French",
+	"de":     "German",
+	"el":     "Greek",
+	"hi":     "Hindi",
+	"hu":     "Hungarian",
+	"is":     "Icelandic",
+	"id":     "Indonesian",
+	"it":     "Italian",
+	"ja":     "Japanese",
+	"km":     "Khmer (Cambodian)",
+	"ko":     "Korean",
+	"la":     "Latin",
+	"lv":     "Latvian",
+	"mk":     "Macedonian",
+	"no":     "Norwegian",
+	"pl":     "Polish",
+	"pt":     "Portuguese",
+	"ro":     "Romanian",
+	"ru":     "Russian",
+	"sr":     "Serbian",
+	"si":     "Sinhala",
+	"sk":     "Slovak",
+	"es":     "Spanish",
+	"es-es":  "Spanish (Spain)",
+	"es-us":  "Spanish (United States)",
+	"sw":     "Swahili",
+	"sv":     "Swedish",
+	"ta":     "Tamil",
+	"th":     "Thai",
+	"tr":     "Turkish",
+	"uk":     "Ukrainian",
+	"vi":     "Vietnamese",
+	"cy":     "Welsh",
 }
 
 type Phrase struct {
@@ -74,11 +74,11 @@ type Phrase struct {
 }
 
 type TTS struct {
-	Speed float64
-	Text	string
+	Speed   float64
+	Text    string
 	Phrases []Phrase
-	Token *token.GttsToken
-	Cache cache.Cache
+	Token   *token.GttsToken
+	Cache   cache.Cache
 }
 
 func splitText(text string) []Phrase {
@@ -94,12 +94,12 @@ func splitText(text string) []Phrase {
 			prevlang = lang
 		}
 		if prevlang != lang {
-			p=append(p, Phrase{Text: text[previndex:index], Lang:prevlang})
+			p = append(p, Phrase{Text: text[previndex:index], Lang: prevlang})
 			prevlang = lang
 			previndex = index
 		}
 	}
-	p=append(p, Phrase{Text: text[previndex:], Lang:prevlang})
+	p = append(p, Phrase{Text: text[previndex:], Lang: prevlang})
 	return p
 }
 
@@ -222,15 +222,14 @@ func (t *TTS) ToSpeech() (string, error) {
 			if err != nil {
 				return "", err
 			}
-		}else{
+		} else {
 			body, err = t.speech(phrase, len(t.Phrases), index)
 			if err != nil {
 				return "", err
 			}
-			t.Cache.Set(phrase.Text,body)
+			t.Cache.Set(phrase.Text, body)
 		}
 		mp3 = append(mp3, body...)
 	}
-	return t.Cache.Set(t.Text,mp3)
+	return t.Cache.Set(t.Text, mp3)
 }
-
