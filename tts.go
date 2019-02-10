@@ -162,7 +162,7 @@ func checkLang(letter rune) string {
 //	return "en"
 //}
 
-func New(text string, speed float64, c md5_cache.Cache) (*TTS, error) {
+func New(text string, speed float64, c md5_cache.cache) (*TTS, error) {
 	if speed < 0 || speed > 2 {
 		return nil, fmt.Errorf("Speed [%f] not supported", speed)
 	}
